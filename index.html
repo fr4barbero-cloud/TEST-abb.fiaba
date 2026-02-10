@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Abbinamento - Autori e frasi</title>
+
+  <!-- Atkinson Hyperlegible -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#111111;
+      --muted:#555555;
+      --line:#e2e2e2;
+
+      --card:#ffffff;
+      --slot:#f6f7f9;
+
+      --shadow: 0 8px 18px rgba(0,0,0,.08);
+
+      --ok:#1fbf67;
+      --bad:#ff4d5a;
+      --accent:#2563eb;
+
+      --r:16px;
+      --r2:12px;
+
+      --fs:18px;
+      --lh:1.5;
+      --stroke:2px;
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family:"Atkinson Hyperlegible", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: var(--fs);
+      line-height: var(--lh);
+      display:flex;
+      justify-content:center;
+      padding: 16px;
+    }
+
+    .app{
+      width:min(1100px, 100%);
+      height: min(860px, calc(100vh - 32px));
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      position: relative;
+    }
+
+    header{
+      border: var(--stroke) solid var(--line);
+      border-radius: var(--r);
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: 14px 14px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex: 0 0 auto;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(20px, 2.2vw, 28px);
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin: 6px 0 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 90ch;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .arrow{
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: var(--stroke) solid var(--line);
+      background: #fff;
+      cursor:pointer;
+      font-weight: 800;
+      font-family: inherit;
+      font-size: 20px;
+      display:grid;
+      place-items:center;
+      transition: transform .08s ease, border-color .12s ease, background .12s ease;
+    }
+    .arrow:hover{
+      border-color: rgba(37,99,235,.45);
+      background: rgba(37,99,235,.06);
+    }
+    .arrow:active{ transform: translateY(1px); }
+    .arrow[disabled]{ opacity:.45; cursor:not-allowed; }
+
+    .pageTag{
+      border: var(--stroke) solid var(--line);
+      background:#fff;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .pageTag strong{ color: var(--text); }
+
+    .pages{
+      flex: 1 1 auto;
+      min-height: 0;
+      position:relative;
+    }
+    .page{
+      position:absolute;
+      inset:0;
+      display:none;
+    }
+    .page.active{ display:block; }
+
+    .board{
+      height:100%;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 12px;
+      min-height:0;
+    }
+    @media (max-width: 900px){
+      .board{
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+    }
+
+    .panel{
+      background: #fff;
+      border: var(--stroke) solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    .panelHead{
+      padding: 12px 14px;
+      border-bottom: var(--stroke) solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      flex: 0 0 auto;
+      background: #fff;
+    }
+    .panelHead h2{
+      margin:0;
+      font-size: 16px;
+    }
+    .panelHead .hint{
+      margin:6px 0 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .badgePill{
+      border: var(--stroke) solid var(--line);
+      background: var(--slot);
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .badgePill strong{ color: var(--text); }
+
+    .msgline{
+      padding: 10px 14px 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+      flex: 0 0 auto;
+    }
+
+    .panelBody{
+      padding: 12px 14px 14px 14px;
+      overflow:auto;
+      min-height:0;
+      background: #fff;
+    }
+
+    .rows{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    .row{
+      border: var(--stroke) solid var(--line);
+      border-radius: var(--r2);
+      padding: 12px;
+      display:grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 12px;
+      align-items:start;
+      background: #fff;
+    }
+    @media (max-width: 600px){
+      .row{ grid-template-columns: 1fr; }
+    }
+
+    .leftLabel{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .num{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      border: var(--stroke) solid var(--line);
+      background: var(--slot);
+      font-size: 14px;
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    .dropzone{
+      min-height: 72px;
+      border-radius: 14px;
+      border: var(--stroke) dashed rgba(17,17,17,.22);
+      background: var(--slot);
+      padding: 10px;
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      flex-wrap:wrap;
+      transition: border-color .12s ease, background .12s ease, transform .12s ease;
+    }
+    .dropzone.empty::before{
+      content:"Trascina qui la frase corretta";
+      color: #666;
+      font-size: 16px;
+    }
+    .dropzone.over{
+      border-color: rgba(37,99,235,.75);
+      background: rgba(37,99,235,.06);
+      transform: scale(1.01);
+    }
+    .dropzone.ok{
+      border-color: var(--ok);
+      background: rgba(31,191,103,.10);
+      border-style: solid;
+    }
+    .dropzone.bad{
+      border-color: var(--bad);
+      background: rgba(255,77,90,.10);
+      border-style: solid;
+    }
+
+    .cards{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    .card{
+      user-select:none;
+      background: var(--card);
+      border: var(--stroke) solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor: grab;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+      transition: transform .10s ease, border-color .12s ease, background .12s ease;
+      position:relative;
+      touch-action: none;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+    .card:hover{
+      border-color: rgba(37,99,235,.55);
+      background: rgba(37,99,235,.04);
+    }
+    .card:active{ cursor: grabbing; transform: scale(.99); }
+
+    .cardHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 38px;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: var(--stroke) solid var(--line);
+      background: var(--slot);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .help{
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .card.inSlot{
+      cursor:pointer;
+      box-shadow:none;
+      background: #fff;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      padding: 12px 14px;
+      border-top: var(--stroke) solid var(--line);
+      background:#fff;
+      flex: 0 0 auto;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .btns{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:center;
+    }
+
+    button{
+      border: var(--stroke) solid var(--line);
+      background:#fff;
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:900;
+      font-family: inherit;
+      font-size: 14px;
+      transition: transform .08s ease, border-color .12s ease, background .12s ease;
+    }
+    button:active{ transform: translateY(1px); }
+
+    button.primary{
+      border-color: rgba(37,99,235,.45);
+      background: rgba(37,99,235,.12);
+    }
+    button.primary:hover{
+      border-color: rgba(37,99,235,.65);
+      background: rgba(37,99,235,.18);
+    }
+
+    button.reset{
+      border-color: rgba(0,0,0,.18);
+      background: var(--slot);
+    }
+    button.reset:hover{ border-color: rgba(0,0,0,.30); }
+
+    button.retry{
+      border-color: rgba(31,191,103,.40);
+      background: rgba(31,191,103,.12);
+    }
+    button.retry:hover{
+      border-color: rgba(31,191,103,.60);
+      background: rgba(31,191,103,.16);
+    }
+
+    button[disabled]{ opacity:.45; cursor:not-allowed; }
+
+    .stats{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:center;
+      justify-content:flex-end;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .stats strong{ color: var(--text); }
+
+    .touchBar{
+      display:none;
+      margin-top: 12px;
+      border-top: var(--stroke) solid var(--line);
+      padding-top: 12px;
+    }
+    @media (pointer: coarse){
+      .touchBar{ display:block; }
+    }
+    .touchBar p{
+      margin:0 0 10px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .touchInfo{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      align-items:center;
+    }
+    .touchTag{
+      border: var(--stroke) dashed rgba(0,0,0,.22);
+      border-radius: 999px;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 14px;
+      background:#fff;
+    }
+    .touchTag strong{ color: var(--text); }
+
+    /* CONFETTI CANVAS */
+    #confetti{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      z-index: 9999;
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="confetti"></canvas>
+
+  <main class="app" aria-label="Abbinamento a due pagine">
+    <header>
+      <div>
+        <h1>Autori e frasi</h1>
+        <p class="sub">
+          PC: trascina le frasi nella riga corretta. Smartphone: tocca una frase e poi tocca la riga.
+          Per togliere un abbinamento, clicca la frase dentro la riga.
+        </p>
+      </div>
+
+      <div class="nav" aria-label="Navigazione pagine">
+        <button class="arrow" id="prevPage" type="button" aria-label="Pagina precedente">‹</button>
+        <span class="pageTag">Pagina <strong id="pageNum">1</strong> di <strong id="pageTot">2</strong></span>
+        <button class="arrow" id="nextPage" type="button" aria-label="Pagina successiva">›</button>
+      </div>
+    </header>
+
+    <section class="pages">
+      <div class="page active" id="page1">
+        <div class="board" id="game1"></div>
+      </div>
+
+      <div class="page" id="page2">
+        <div class="board" id="game2"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // -----------------------------
+    // CONFETTI “bellissimo” multicolore
+    // -----------------------------
+    const confettiCanvas = document.getElementById("confetti");
+    const cctx = confettiCanvas.getContext("2d");
+    let confettiRunning = false;
+
+    function resizeConfetti(){
+      confettiCanvas.width = window.innerWidth * devicePixelRatio;
+      confettiCanvas.height = window.innerHeight * devicePixelRatio;
+      cctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    }
+    window.addEventListener("resize", resizeConfetti);
+
+    function launchConfetti(durationMs=2800){
+      if(confettiRunning) return;
+      confettiRunning = true;
+
+      resizeConfetti();
+      confettiCanvas.style.display = "block";
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // palette ricca “tutti i colori”
+      const palette = [
+        "#ff2d55","#ff9500","#ffcc00","#34c759","#00c7be",
+        "#32ade6","#007aff","#5856d6","#af52de","#ff3b30",
+        "#ffd60a","#30d158","#64d2ff","#0a84ff","#bf5af2",
+        "#ff9f0a","#ff375f","#00d4ff","#00ff85","#ff00c8"
+      ];
+
+      const pieces = [];
+      const count = Math.min(420, Math.floor((W*H)/3800));
+
+      for(let i=0;i<count;i++){
+        const size = 5 + Math.random()*8;
+        pieces.push({
+          x: Math.random()*W,
+          y: -20 - Math.random()*H*0.6,
+          w: size*(0.7+Math.random()*0.7),
+          h: size*(0.4+Math.random()*0.7),
+          vy: 2.2 + Math.random()*6.2,
+          vx: -2.5 + Math.random()*5,
+          rot: Math.random()*Math.PI*2,
+          vr: -0.22 + Math.random()*0.44,
+          c: palette[(Math.random()*palette.length)|0],
+          a: 1,
+          // tipo: rettangolo o “streamer”
+          t: Math.random() < 0.28 ? "streamer" : "rect",
+          sway: (Math.random()*2-1) * (0.8 + Math.random()*1.6)
+        });
+      }
+
+      const start = performance.now();
+      const fadeStart = Math.max(0, durationMs - 700);
+
+      function tick(now){
+        const t = now - start;
+        cctx.clearRect(0,0,W,H);
+
+        for(const p of pieces){
+          // fisica
+          p.vy += 0.03;                 // gravità
+          p.x += p.vx + Math.sin((p.y*0.02)) * p.sway * 0.2;
+          p.y += p.vy;
+          p.rot += p.vr;
+
+          // rimbalzo laterale leggero
+          if(p.x < -40) p.x = W + 40;
+          if(p.x > W + 40) p.x = -40;
+
+          // dissolvenza
+          if(t > fadeStart){
+            p.a = Math.max(0, (durationMs - t) / (durationMs - fadeStart));
+          }
+
+          // disegno
+          cctx.save();
+          cctx.globalAlpha = p.a;
+          cctx.translate(p.x, p.y);
+          cctx.rotate(p.rot);
+          cctx.fillStyle = p.c;
+
+          if(p.t === "streamer"){
+            // nastrino ondulato
+            cctx.beginPath();
+            cctx.moveTo(-p.w/2, -p.h/2);
+            cctx.quadraticCurveTo(0, -p.h, p.w/2, -p.h/2);
+            cctx.quadraticCurveTo(0, 0, -p.w/2, p.h/2);
+            cctx.quadraticCurveTo(0, p.h, p.w/2, p.h/2);
+            cctx.quadraticCurveTo(0, 0, -p.w/2, -p.h/2);
+            cctx.fill();
+          } else {
+            cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          }
+
+          cctx.restore();
+        }
+
+        if(t < durationMs){
+          requestAnimationFrame(tick);
+        }else{
+          confettiCanvas.style.display = "none";
+          confettiRunning = false;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // -----------------------------
+    // DATI (come già impostato)
+    // -----------------------------
+    const GAME1 = {
+      titleA: "Colonna A – Autori",
+      titleB: "Colonna B – Frasi",
+      rows: [
+        { id: "row_shahrazad", left: "Shahrazād (Le Mille e una Notte)", correctCardId: "card_A" },
+        { id: "row_perrault", left: "Charles Perrault",                  correctCardId: "card_B" },
+        { id: "row_grimm",    left: "Fratelli Grimm",                    correctCardId: "card_C" },
+        { id: "row_afanasiev",left: "Aleksandr Afanasiev",               correctCardId: "card_D" }
+      ],
+      cards: [
+        { id: "card_A", label:"A", text: "Ogni notte interrompe il racconto sul più bello; Aladino, Ali Babà e Sinbad mostrano che le storie possono salvare." },
+        { id: "card_B", label:"B", text: "Nel Seicento mette per iscritto fiabe con magia e insegnamenti; Cenerentola e Cappuccetto Rosso parlano di virtù e pericoli." },
+        { id: "card_C", label:"C", text: "Nell’Ottocento trasforma racconti popolari ascoltati a voce in storie scritte; fiabe come Biancaneve e Hansel e Gretel aiutano a crescere." },
+        { id: "card_D", label:"D", text: "Raccoglie la tradizione russa per conservarne l’anima; tra Baba Jaga e l’Uccello di Fuoco i protagonisti vincono con astuzia e coraggio." }
+      ]
+    };
+
+    const GAME2 = {
+      titleA: "Colonna A – Autori",
+      titleB: "Colonna B – Frasi",
+      rows: [
+        { id: "row_munari",   left: "Bruno Munari",             correctCardId: "card_E" },
+        { id: "row_rodari",   left: "Gianni Rodari",            correctCardId: "card_F" },
+        { id: "row_calvino",  left: "Italo Calvino",            correctCardId: "card_G" },
+        { id: "row_andersen", left: "Hans Christian Andersen",  correctCardId: "card_H" }
+      ],
+      cards: [
+        { id: "card_E", label:"E", text: "Nel Novecento rende il libro un oggetto da esplorare: immagini, materiali e forme semplici per osservare e immaginare." },
+        { id: "card_F", label:"F", text: "Considera la fiaba un gioco serio che allena il pensiero; parole lontane unite insieme possono far nascere storie nuove." },
+        { id: "card_G", label:"G", text: "Raccoglie e riscrive Fiabe italiane da tutte le regioni, mantenendo magia, prove e ironia; mostra la ricchezza culturale del paese." },
+        { id: "card_H", label:"H", text: "Trasforma la fiaba in un racconto intimo: solitudine, speranza e desiderio di essere accettati; fragilità che diventa forza." }
+      ]
+    };
+
+    // -----------------------------
+    // GIOCO
+    // -----------------------------
+    function createMatchGame(rootEl, config){
+      let attempts = 0;
+      let draggingId = null;
+      let touchSelectedCardId = null;
+
+      let autoResetTimer = null;
+      let waitingRetry = false;
+
+      rootEl.innerHTML = `
+        <section class="panel" aria-label="Colonna sinistra">
+          <div class="panelHead">
+            <div>
+              <h2>${escapeHtml(config.titleA)}</h2>
+              <p class="hint">Abbina ogni autore a una sola frase</p>
+            </div>
+            <div class="badgePill">Esito: <strong id="result">non verificato</strong></div>
+          </div>
+
+          <div class="msgline" id="msg" aria-live="polite">Sposta le frasi dalla colonna destra alle righe corrette.</div>
+
+          <div class="panelBody">
+            <div class="rows" id="rows"></div>
+
+            <div class="touchBar" aria-label="Modalità smartphone">
+              <p>Smartphone: tocca una frase (a destra), poi tocca la riga dell’autore (a sinistra).</p>
+              <div class="touchInfo">
+                <span class="touchTag">Frase selezionata: <strong id="selName">nessuna</strong></span>
+                <button id="clearSel" type="button">Annulla</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="toolbar" aria-label="Azioni">
+            <div class="btns">
+              <button class="primary" id="check" type="button">Verifica</button>
+              <button class="reset" id="reset" type="button">Reset</button>
+              <button class="retry" id="retry" type="button" disabled>Riprova</button>
+            </div>
+            <div class="stats">
+              Abbinamenti: <strong id="done">0</strong>/<strong id="tot">0</strong> · Tentativi: <strong id="attempts">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel" aria-label="Colonna destra">
+          <div class="panelHead">
+            <div>
+              <h2>${escapeHtml(config.titleB)}</h2>
+              <p class="hint">Trascina (PC) o tocca (smartphone)</p>
+            </div>
+            <div class="badgePill">Nel mazzo: <strong id="deckCount">0</strong></div>
+          </div>
+
+          <div class="panelBody">
+            <div class="cards" id="deck"></div>
+          </div>
+        </aside>
+      `;
+
+      const rowsEl = rootEl.querySelector("#rows");
+      const deckEl = rootEl.querySelector("#deck");
+
+      const msgEl = rootEl.querySelector("#msg");
+      const resultEl = rootEl.querySelector("#result");
+
+      const doneEl = rootEl.querySelector("#done");
+      const totEl = rootEl.querySelector("#tot");
+      const attemptsEl = rootEl.querySelector("#attempts");
+      const deckCountEl = rootEl.querySelector("#deckCount");
+
+      const checkBtn = rootEl.querySelector("#check");
+      const resetBtn = rootEl.querySelector("#reset");
+      const retryBtn = rootEl.querySelector("#retry");
+
+      const selNameEl = rootEl.querySelector("#selName");
+      const clearSelBtn = rootEl.querySelector("#clearSel");
+
+      function setMsg(t){ msgEl.textContent = t; }
+
+      function updateCounters(){
+        const total = config.rows.length;
+        const placed = rootEl.querySelectorAll(".dropzone .card").length;
+        totEl.textContent = total;
+        doneEl.textContent = placed;
+        attemptsEl.textContent = attempts;
+        deckCountEl.textContent = deckEl.querySelectorAll(".card").length;
+      }
+
+      function cancelAutoReset(){
+        if(autoResetTimer){
+          clearTimeout(autoResetTimer);
+          autoResetTimer = null;
+        }
+      }
+      function startAutoReset(){
+        cancelAutoReset();
+        waitingRetry = true;
+        autoResetTimer = setTimeout(() => {
+          if(waitingRetry) fullReset(true);
+        }, 4 * 60 * 1000);
+      }
+
+      function clearCheckVisuals(){
+        rootEl.querySelectorAll(".dropzone").forEach(dz => dz.classList.remove("ok","bad"));
+        resultEl.textContent = "non verificato";
+        retryBtn.disabled = true;
+        waitingRetry = false;
+        cancelAutoReset();
+      }
+
+      function createRow(rowIdx, rowObj){
+        const row = document.createElement("div");
+        row.className = "row";
+        row.dataset.rowId = rowObj.id;
+
+        const label = document.createElement("div");
+        label.className = "leftLabel";
+        label.innerHTML = `<span class="num">${rowIdx+1}</span><span>${escapeHtml(rowObj.left)}</span>`;
+
+        const dz = document.createElement("div");
+        dz.className = "dropzone empty";
+        dz.dataset.rowId = rowObj.id;
+
+        dz.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dz.classList.add("over");
+          e.dataTransfer.dropEffect = "move";
+        });
+        dz.addEventListener("dragleave", () => dz.classList.remove("over"));
+        dz.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dz.classList.remove("over");
+          const cardId = e.dataTransfer.getData("text/plain") || draggingId;
+          if(!cardId) return;
+
+          if(dz.querySelector(".card")){
+            setMsg("Questa riga ha già una frase. Clicca la frase nella riga per rimetterla a destra.");
+            return;
+          }
+
+          placeCardIntoRow(cardId, rowObj.id);
+          clearCheckVisuals();
+          setMsg("Frase inserita.");
+          updateCounters();
+        });
+
+        row.addEventListener("click", (e) => {
+          if(e.target.closest(".card")) return;
+
+          if(!touchSelectedCardId){
+            setMsg("Tocca una frase a destra, poi tocca la riga dell’autore.");
+            return;
+          }
+          if(dz.querySelector(".card")){
+            setMsg("Questa riga ha già una frase. Clicca la frase nella riga per rimetterla a destra.");
+            return;
+          }
+          placeCardIntoRow(touchSelectedCardId, rowObj.id);
+          touchSelectedCardId = null;
+          selNameEl.textContent = "nessuna";
+          clearCheckVisuals();
+          setMsg("Frase inserita.");
+          updateCounters();
+        });
+
+        row.appendChild(label);
+        row.appendChild(dz);
+        return row;
+      }
+
+      function createCard(cardObj){
+        const card = document.createElement("div");
+        card.className = "card";
+        card.draggable = true;
+        card.dataset.cardId = cardObj.id;
+
+        card.innerHTML = `
+          <div class="cardHeader">
+            <span class="tag">${escapeHtml(cardObj.label)}</span>
+            <p class="help">Trascina o tocca</p>
+          </div>
+          <div>${escapeHtml(cardObj.text)}</div>
+        `;
+
+        card.addEventListener("dragstart", (e) => {
+          draggingId = cardObj.id;
+          e.dataTransfer.setData("text/plain", cardObj.id);
+          e.dataTransfer.effectAllowed = "move";
+          setMsg("Trascina la frase nella riga corretta.");
+        });
+        card.addEventListener("dragend", () => draggingId = null);
+
+        card.addEventListener("click", () => {
+          const parent = card.parentElement;
+          if(parent && parent.classList.contains("dropzone")){
+            moveCardToDeck(cardObj.id);
+            clearCheckVisuals();
+            setMsg("Frase rimessa a destra.");
+            updateCounters();
+            return;
+          }
+          touchSelectedCardId = cardObj.id;
+          selNameEl.textContent = `(${cardObj.label})`;
+          setMsg("Ora tocca la riga dell’autore in cui vuoi inserire questa frase.");
+        });
+
+        return card;
+      }
+
+      function placeCardIntoRow(cardId, rowId){
+        const card = rootEl.querySelector(`.card[data-card-id="${cssEscape(cardId)}"]`);
+        const dz = rootEl.querySelector(`.dropzone[data-row-id="${cssEscape(rowId)}"]`);
+        if(!card || !dz) return;
+
+        const parent = card.parentElement;
+        if(parent && parent.classList.contains("dropzone")) return;
+
+        dz.classList.remove("empty");
+        dz.appendChild(card);
+        card.classList.add("inSlot");
+      }
+
+      function moveCardToDeck(cardId){
+        const card = rootEl.querySelector(`.card[data-card-id="${cssEscape(cardId)}"]`);
+        if(!card) return;
+
+        const parent = card.parentElement;
+        if(parent && parent.classList.contains("dropzone")){
+          parent.classList.add("empty");
+          parent.classList.remove("ok","bad");
+        }
+        card.classList.remove("inSlot");
+        deckEl.appendChild(card);
+      }
+
+      function checkAnswers(){
+        const total = config.rows.length;
+        const placed = rootEl.querySelectorAll(".dropzone .card").length;
+
+        if(placed !== total){
+          setMsg("Completa tutti gli abbinamenti prima della verifica.");
+          return;
+        }
+
+        attempts += 1;
+        let correct = 0;
+
+        config.rows.forEach((rowObj) => {
+          const dz = rootEl.querySelector(`.dropzone[data-row-id="${cssEscape(rowObj.id)}"]`);
+          const card = dz.querySelector(".card");
+
+          dz.classList.remove("ok","bad");
+
+          const ok = card && card.dataset.cardId === rowObj.correctCardId;
+          if(ok){
+            dz.classList.add("ok");
+            correct += 1;
+          } else {
+            dz.classList.add("bad");
+          }
+        });
+
+        resultEl.textContent = `${correct}/${total}`;
+        retryBtn.disabled = false;
+
+        if(correct === total){
+          setMsg("Perfetto: tutto corretto!");
+          launchConfetti(3200);
+        } else {
+          setMsg("Verifica completata. Clicca Riprova entro 4 minuti per correggere, altrimenti il test si azzera.");
+          startAutoReset();
+        }
+
+        updateCounters();
+      }
+
+      function retry(){
+        waitingRetry = false;
+        cancelAutoReset();
+
+        rootEl.querySelectorAll(".dropzone").forEach(dz => dz.classList.remove("ok","bad"));
+        resultEl.textContent = "non verificato";
+        retryBtn.disabled = true;
+
+        setMsg("Ora puoi correggere gli abbinamenti e poi fare di nuovo Verifica.");
+      }
+
+      function fullReset(fromAuto=false){
+        cancelAutoReset();
+        waitingRetry = false;
+
+        rootEl.querySelectorAll(".dropzone .card").forEach(card => {
+          card.classList.remove("inSlot");
+          deckEl.appendChild(card);
+        });
+
+        rootEl.querySelectorAll(".dropzone").forEach(dz => {
+          dz.classList.add("empty");
+          dz.classList.remove("ok","bad");
+        });
+
+        const cards = Array.from(deckEl.querySelectorAll(".card"));
+        deckEl.innerHTML = "";
+        shuffle(cards).forEach(c => deckEl.appendChild(c));
+
+        attempts = 0;
+        retryBtn.disabled = true;
+        touchSelectedCardId = null;
+        selNameEl.textContent = "nessuna";
+        resultEl.textContent = "non verificato";
+
+        setMsg(fromAuto ? "Tempo scaduto: risposte azzerate automaticamente." : "Risposte azzerate.");
+        updateCounters();
+      }
+
+      checkBtn.addEventListener("click", checkAnswers);
+      resetBtn.addEventListener("click", () => fullReset(false));
+      retryBtn.addEventListener("click", retry);
+
+      clearSelBtn.addEventListener("click", () => {
+        touchSelectedCardId = null;
+        selNameEl.textContent = "nessuna";
+        setMsg("Selezione annullata.");
+      });
+
+      function init(){
+        rowsEl.innerHTML = "";
+        config.rows.forEach((r, idx) => rowsEl.appendChild(createRow(idx, r)));
+
+        deckEl.innerHTML = "";
+        const cardEls = config.cards.map(c => createCard(c));
+        shuffle(cardEls).forEach(el => deckEl.appendChild(el));
+
+        updateCounters();
+      }
+
+      init();
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function cssEscape(str){
+      return String(str).replaceAll('"','\\"');
+    }
+    function shuffle(arr){
+      const a = [...arr];
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
+
+    // Avvio due pagine
+    createMatchGame(document.getElementById("game1"), GAME1);
+    createMatchGame(document.getElementById("game2"), GAME2);
+
+    // Navigazione pagine
+    const page1 = document.getElementById("page1");
+    const page2 = document.getElementById("page2");
+    const prevBtn = document.getElementById("prevPage");
+    const nextBtn = document.getElementById("nextPage");
+    const pageNumEl = document.getElementById("pageNum");
+    const pageTotEl = document.getElementById("pageTot");
+
+    let currentPage = 1;
+    const totalPages = 2;
+    pageTotEl.textContent = totalPages;
+
+    function setPage(n){
+      currentPage = Math.max(1, Math.min(totalPages, n));
+      pageNumEl.textContent = currentPage;
+
+      page1.classList.toggle("active", currentPage === 1);
+      page2.classList.toggle("active", currentPage === 2);
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+    }
+
+    prevBtn.addEventListener("click", () => setPage(currentPage - 1));
+    nextBtn.addEventListener("click", () => setPage(currentPage + 1));
+    setPage(1);
+  </script>
+</body>
+</html>
