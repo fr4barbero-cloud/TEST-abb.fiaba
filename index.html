@@ -29,6 +29,7 @@
       --r:16px;
       --r2:12px;
 
+      /* Base desktop */
       --fs:18px;
       --lh:1.5;
       --stroke:2px;
@@ -47,6 +48,8 @@
       display:flex;
       justify-content:center;
       padding: 16px;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     .app{
@@ -104,6 +107,7 @@
       display:grid;
       place-items:center;
       transition: transform .08s ease, border-color .12s ease, background .12s ease;
+      touch-action: manipulation;
     }
     .arrow:hover{
       border-color: rgba(37,99,235,.45);
@@ -135,9 +139,8 @@
     }
     .page.active{ display:block; }
 
-    /* UNA PAGINA = UN QUIZ:
-       - PC: due colonne
-       - Smartphone: stack */
+    /* PC: due colonne.
+       Mobile: stack e più spazio click */
     .board{
       height:100%;
       display:grid;
@@ -148,7 +151,11 @@
     @media (max-width: 900px){
       .board{
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
+        grid-template-rows: auto auto;
+      }
+      .app{
+        height: auto;
+        min-height: calc(100vh - 32px);
       }
     }
 
@@ -206,6 +213,8 @@
       overflow:auto;
       min-height:0;
       background: #fff;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
     .rows{
@@ -298,9 +307,11 @@
       box-shadow: 0 6px 14px rgba(0,0,0,.06);
       transition: transform .10s ease, border-color .12s ease, background .12s ease;
       position:relative;
-      touch-action: none;
+      touch-action: none; /* drag */
       font-size: 17px;
       line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
+      word-break: break-word;
     }
     .card:hover{
       border-color: rgba(37,99,235,.55);
@@ -370,6 +381,8 @@
       font-family: inherit;
       font-size: 14px;
       transition: transform .08s ease, border-color .12s ease, background .12s ease;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     button:active{ transform: translateY(1px); }
 
@@ -447,6 +460,155 @@
       pointer-events:none;
       z-index: 9999;
       display:none;
+    }
+
+    /* -----------------------------
+       MIGLIORIE MOBILE (fino a 600px)
+       - header in colonna
+       - bottoni più comodi
+       - pannelli con altezza naturale
+       - testo più grande e spaziature
+       ----------------------------- */
+    @media (max-width: 600px){
+      :root{
+        --fs: 17px;
+        --stroke: 2px;
+      }
+
+      body{
+        padding: 10px;
+      }
+
+      .app{
+        height: auto;
+        min-height: calc(100vh - 20px);
+        gap: 10px;
+      }
+
+      header{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .sub{
+        font-size: 14px;
+      }
+
+      .nav{
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .arrow{
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 22px;
+      }
+
+      .pageTag{
+        flex: 1 1 auto;
+        text-align: center;
+        padding: 10px 10px;
+      }
+
+      .panelHead{
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .panelHead h2{
+        font-size: 16px;
+      }
+
+      .badgePill{
+        width: 100%;
+        text-align: center;
+      }
+
+      .panelBody{
+        padding: 12px;
+        max-height: none;
+        overflow: visible; /* evita doppi scroll su mobile */
+      }
+
+      .board{
+        height: auto;
+        grid-template-rows: auto auto;
+      }
+
+      .row{
+        padding: 12px;
+      }
+
+      .leftLabel{
+        font-size: 18px;
+      }
+
+      .dropzone{
+        min-height: 84px;
+        padding: 12px;
+      }
+
+      .dropzone.empty::before{
+        content:"Tocca una risposta e poi questa riga";
+        font-size: 15px;
+      }
+
+      .card{
+        padding: 14px;
+        font-size: 16px;
+      }
+
+      .cardHeader{
+        margin-bottom: 10px;
+      }
+
+      .toolbar{
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        padding: 10px 12px;
+        gap: 8px;
+      }
+
+      .btns{
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+      }
+
+      .btns button{
+        width: 100%;
+        min-height: 48px; /* target touch comodo */
+        padding: 12px 10px;
+        border-radius: 14px;
+      }
+
+      .stats{
+        width: 100%;
+        justify-content: center;
+        font-size: 13px;
+      }
+    }
+
+    /* Accessibilità: focus visibile */
+    button:focus-visible,
+    .card:focus-visible,
+    .dropzone:focus-visible,
+    .arrow:focus-visible{
+      outline: 3px solid rgba(37,99,235,.55);
+      outline-offset: 2px;
+    }
+
+    /* Riduci animazioni se richiesto dal sistema */
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; }
     }
   </style>
 </head>
@@ -818,7 +980,6 @@
           updateCounters();
         });
 
-        // touch: tocca riga per inserire carta selezionata
         row.addEventListener("click", (e) => {
           if(e.target.closest(".card")) return;
 
@@ -866,7 +1027,6 @@
         });
         card.addEventListener("dragend", () => draggingId = null);
 
-        // click: se in riga -> torna a destra, altrimenti seleziona per touch
         card.addEventListener("click", () => {
           const parent = card.parentElement;
           if(parent && parent.classList.contains("dropzone")){
@@ -1036,12 +1196,10 @@
       return a;
     }
 
-    // Avvio 3 quiz: uno per pagina
     createMatchGame(document.getElementById("game1"), QUIZ1);
     createMatchGame(document.getElementById("game2"), QUIZ2);
     createMatchGame(document.getElementById("game3"), QUIZ3);
 
-    // Navigazione pagine
     const pageEls = [document.getElementById("page1"), document.getElementById("page2"), document.getElementById("page3")];
     const prevBtn = document.getElementById("prevPage");
     const nextBtn = document.getElementById("nextPage");
@@ -1060,6 +1218,9 @@
 
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
+
+      // su mobile, quando cambi pagina, torna in alto (più comodo)
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     prevBtn.addEventListener("click", () => setPage(currentPage - 1));
